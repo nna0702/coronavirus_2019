@@ -237,7 +237,7 @@ def plot_new_cases(data, country, province):
 
     dates = get_dates(data, case_type)
     num_cases = get_num_cases(data, case_type, country, province)
-    ax.plot(dates, num_cases, color=color_daily)
+    ax.bar(dates, num_cases, color=color_daily)
 
     # x axis
     ax.set_xlabel('End of month')
