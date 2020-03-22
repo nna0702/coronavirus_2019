@@ -1,9 +1,11 @@
+import argparse
 import urllib.request
 import pandas as pd
 from datetime import datetime
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 plt.style.use('default')
 plt.rcParams['font.sans-serif'] = "Arial"
 
@@ -15,10 +17,13 @@ def get_data():
     death_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
 
     # Create a dictionary of file name and url name
-    file_names = ['confirmed.csv', 'recovered.csv', 'death.csv']
+    file_names = ['data/confirmed.csv', 'data/recovered.csv', 'data/death.csv']
     urls = [confirmed_url, recovered_url, death_url]
     case_types = ['confirmed', 'recovered', 'death']
     data = {}
+
+    # Create data/ folder
+    Path('data/').mkdir(exist_ok=True)
 
     for file_name, url, case_type in zip(file_names, urls, case_types):
         # Save csv files from url
@@ -131,10 +136,8 @@ def plot_case_by_country(data, country, province):
         ax.plot(dates, num_cases, color=color)
 
         # No legend
-        ax.text(dates[-1],
-                num_cases[-1],
-                case_type,
-                color=color)
+        ax.text(dates[-1], num_cases[-1], '  ' + case_type.capitalize(),
+                color=color, ha='left', va='center')
 
         # x axis
         ax.set_xlabel('End of month')
@@ -153,7 +156,7 @@ def plot_case_by_country(data, country, province):
     sns.despine(ax=ax)
 
     fig.tight_layout()
-    path = 'case_by_country.pdf'
+    path = 'plots/case_by_country.pdf'
     fig.savefig(path, bbox_inches='tight')
     print('Saved to {}'.format(path))
 
@@ -202,7 +205,7 @@ def plot_active_cases(data, country, province):
     sns.despine(ax=ax)
 
     fig.tight_layout()
-    path = 'active_case_by_country.pdf'
+    path = 'plots/active_case_by_country.pdf'
     fig.savefig(path, bbox_inches='tight')
     print('Saved to {}'.format(path))
 
@@ -256,7 +259,7 @@ def plot_new_cases(data, country, province):
     sns.despine(ax=ax)
 
     fig.tight_layout()
-    path = 'daily_case_by_country.pdf'
+    path = 'plots/daily_case_by_country.pdf'
     fig.savefig(path, bbox_inches='tight')
     print('Saved to {}'.format(path))
 
@@ -265,7 +268,17 @@ def plot_new_cases(data, country, province):
 # python analysis.py
 # it is NOT run if you do import analysis
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--country', default='Vietnam', help=' ')
+    parser.add_argument('--province', default=None, help=' ')
+    args = parser.parse_args()
+
     data = get_data()
-    plot_case_by_country(data, 'Italy', None)
-    plot_active_cases(data, 'US', 'California')
-    plot_new_cases(data, 'Vietnam', None)
+
+    # Create plots/ folder
+    Path('plots/').mkdir(exist_ok=True)
+
+    plot_case_by_country(data, args.country, args.province)
+    plot_active_cases(data, args.country, args.province)
+    plot_new_cases(data, args.country, args.province)
