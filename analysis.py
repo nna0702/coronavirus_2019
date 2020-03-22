@@ -160,10 +160,13 @@ def plot_case_by_country(data, country, province):
 
 def plot_active_cases(data, country, province):
     # Create a data frame with number of active cases
-    active = data['confirmed'].iloc[:, 4:] - data['recovered'].iloc[:, 4:] - data['death'].iloc[:, 4:]
+    active = (data['confirmed'].iloc[:, 4:] -
+              data['recovered'].iloc[:, 4:] -
+              data['death'].iloc[:, 4:])
 
     # Copy the identifying columns on geography
-    identifier = data['confirmed'][['province/state','country/region','lat','long']]
+    identifier = data['confirmed'][['province/state',
+                                    'country/region', 'lat', 'long']]
 
     # Append two dataframes
     active = pd.concat([identifier, active], axis=1)
@@ -214,7 +217,8 @@ def plot_new_cases(data, country, province):
     daily_new = col.to_frame()
 
     for i in range(5, len(data['confirmed'].columns)):
-        col = pd.Series(data['confirmed'].iloc[:, i] - data['confirmed'].iloc[:, i-1])
+        col = pd.Series(data['confirmed'].iloc[:, i] -
+                        data['confirmed'].iloc[:, i-1])
         daily_new[data['confirmed'].columns[i]] = col
 
     # Append with geography identifier
