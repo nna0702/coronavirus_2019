@@ -360,7 +360,7 @@ def plot_compare_first_infection(data, countries):
     ax.xaxis.set_tick_params(direction='in')
 
     # y axis
-    ax.set_ylabel('Number of cases')
+    ax.set_ylabel('Number of confirmed cases')
     ax.yaxis.set_tick_params(direction='in')
     ax.set_yticklabels(['{:,}'.format(int(x)) 
                         for x in ax.get_yticks().tolist()])
