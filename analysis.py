@@ -293,7 +293,7 @@ def get_first_infected(data, country, province=None):
     return result
 
 
-def plot_first_infection(country, province):
+def plot_first_infection(data, country, province):
     """
     returns the graph of first infection for a single country/ province
     """
@@ -328,7 +328,7 @@ def plot_first_infection(country, province):
     print('Saved to {}'.format(path))
 
 
-def plot_compare_first_infection(countries):
+def plot_compare_first_infection(data, countries):
     """
     returns the graph of first infection for a few countries
     """
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     plot_case_by_country(data, args.country, args.province)
     plot_active_cases(data, args.country, args.province)
     plot_new_cases(data, args.country, args.province)
-    plot_first_infection(args.country, args.province)
-    plot_compare_first_infection(['US', 'United Kingdom', 'Singapore',
-                                  'China', 'Italy', 'Korea, South',
-                                  'Germany', 'Iran', 'Vietnam'])
+    plot_first_infection(data, args.country, args.province)
+    plot_compare_first_infection(data, ['US', 'United Kingdom', 'Singapore',
+                                        'China', 'Italy', 'Korea, South',
+                                        'Germany', 'Iran', 'Vietnam'])
