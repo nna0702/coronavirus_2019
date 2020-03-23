@@ -278,7 +278,7 @@ def get_first(data, case_type, country, province=None):
                      (data[case_type]['province/state'] == province))
         result = data[case_type][condition].iloc[:, 4:]
         result = result.iloc[0, :]
-  
+
     if sum(result == 0) == len(result):
         result = None
     else:
@@ -334,7 +334,7 @@ def plot_first(data, case_type, country, province):
     print('Saved to {}'.format(path))
 
 
-def plot_compare_first(data, case_type, countries):
+def plot_compare_first(data, case_type, countries, path=None):
     """
     returns the graph of first infection or death for a few countries
     """
@@ -379,7 +379,9 @@ def plot_compare_first(data, case_type, countries):
 
     fig.tight_layout()
 
-    path = 'plots/compare_first_{}.pdf'.format(case_type)
+    if path is None:
+        path = 'plots/compare_first_{}.pdf'.format(case_type)
+
     fig.savefig(path, bbox_inches='tight')
     print('Saved to {}'.format(path))
 
@@ -403,9 +405,10 @@ if __name__ == '__main__':
     plot_active_cases(data, args.country, args.province)
     plot_new_cases(data, args.country, args.province)
     plot_first(data, 'confirmed', args.country, args.province)
-    plot_compare_first(data, 'confirmed', ['US', 'United Kingdom', 'Singapore',
-                                           'China', 'Italy', 'Korea, South',
-                                           'Germany', 'Iran', 'Vietnam'])
-    plot_compare_first(data, 'death', ['US', 'United Kingdom', 'Singapore',
-                                       'China', 'Italy', 'Korea, South',
-                                       'Germany', 'Iran', 'Vietnam'])
+    countries = ['US', 'United Kingdom', 'Singapore',
+                 'China', 'Italy', 'Korea, South',
+                 'Germany', 'Iran', 'Vietnam']
+    plot_compare_first(data, 'confirmed', countries)
+    plot_compare_first(data, 'death', countries)
+    plot_compare_first(data, 'death', countries,
+                       'corona_deaths.png')

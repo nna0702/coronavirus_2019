@@ -1,0 +1,1 @@
+<img src="corona_deaths.png"/>
