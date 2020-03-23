@@ -264,6 +264,116 @@ def plot_new_cases(data, country, province):
     print('Saved to {}'.format(path))
 
 
+def get_first_infected(data, country, province=None):
+    """
+    returns the time-series data frame with no. of confirmed cases from the
+    day of first infection
+    """
+    if province is None:
+        # Extract the data frame with the country of interest
+        result = (data['confirmed'][data['confirmed']['country/region'] == country].iloc[:, 4:]).sum(axis=0)
+
+    else:
+        condition = ((data['confirmed']['country/region'] == country) &
+                     (data['confirmed']['province/state'] == province))
+        result = data['confirmed'][condition].iloc[:, 4:]
+        result = result.iloc[0, :]
+
+    # Extract the dates with non-zero cases
+    result = result.loc[result != 0]
+
+    # Create a series of number of days since first infection
+    num_days = pd.Series(range(0, len(result)))
+    num_days.index = result.index
+
+    # Combine series of non-zero cases and no. of days since first infection
+    result = pd.concat([num_days, result], axis=1)
+    result.columns = ['num_days', 'confirmed_cases']
+
+    return result
+
+
+def plot_first_infection(country, province):
+    """
+    returns the graph of first infection for a single country/ province
+    """
+
+    fig, ax = plt.subplots(1, 1)
+
+    table = get_first_infected(data, country, province)
+
+    # Color
+    color = get_rgb((31, 119, 180))
+
+    # Plot the graph
+    ax.plot(table['num_days'].values, table['confirmed_cases'].values,
+            color=color)
+
+    # x axis
+    ax.set_xlabel('Days since first infection')
+    ax.xaxis.set_tick_params(direction='in')
+
+    # y axis
+    ax.set_ylabel('Number of cases')
+    ax.yaxis.set_tick_params(direction='in')
+
+    # Set graph title
+    ax.set_title(get_title(country, province))
+
+    sns.despine(ax=ax)
+
+    fig.tight_layout()
+    path = 'plots/case_first_infection.pdf'
+    fig.savefig(path, bbox_inches='tight')
+    print('Saved to {}'.format(path))
+
+
+def plot_compare_first_infection(countries):
+    """
+    returns the graph of first infection for a few countries
+    """
+
+    fig, ax = plt.subplots(1, 1)
+
+    palette10 = [(31, 119, 180), (255, 127, 14),
+                 (44, 160, 44),  (214, 39, 40),
+                 (148, 103, 189),  (140, 86, 75),
+                 (227, 119, 194),  (127, 127, 127),
+                 (188, 189, 34),  (23, 190, 207)]
+
+    for country in countries:
+        table = get_first_infected(data, country, None)
+
+        # Get color
+        color = get_rgb(palette10[countries.index(country)])
+        ax.plot(table['num_days'].values, table['confirmed_cases'].values,
+                color=color)
+
+        # No legend
+        ax.text(table['num_days'].values[-1],
+                table['confirmed_cases'].values[-1],
+                '  ' + country,
+                ha='left', va='center', color=color)
+
+    # x axis
+    ax.set_xlabel('Days since first infection')
+    ax.xaxis.set_tick_params(direction='in')
+
+    # y axis
+    ax.set_ylabel('Number of cases')
+    ax.yaxis.set_tick_params(direction='in')
+    ax.set_yticklabels(['{:,}'.format(int(x)) 
+                        for x in ax.get_yticks().tolist()])
+
+    sns.despine(ax=ax)
+
+    fig.tight_layout()
+
+    path = 'plots/compare_first_infection.pdf'
+    fig.savefig(path, bbox_inches='tight')
+    print('Saved to {}'.format(path))
+
+
 # this means that the code inside is only run when you run
 # python analysis.py
 # it is NOT run if you do import analysis
@@ -282,3 +392,7 @@ if __name__ == '__main__':
     plot_case_by_country(data, args.country, args.province)
     plot_active_cases(data, args.country, args.province)
     plot_new_cases(data, args.country, args.province)
+    plot_first_infection(args.country, args.province)
+    plot_compare_first_infection(['US', 'United Kingdom', 'Singapore',
+                                  'China', 'Italy', 'Korea, South',
+                                  'Germany', 'Iran', 'Vietnam'])
