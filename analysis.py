@@ -264,53 +264,59 @@ def plot_new_cases(data, country, province):
     print('Saved to {}'.format(path))
 
 
-def get_first_infected(data, country, province=None):
+def get_first(data, case_type, country, province=None):
     """
     returns the time-series data frame with no. of confirmed cases from the
-    day of first infection
+    day of first infection or no. of deaths since first death
     """
     if province is None:
         # Extract the data frame with the country of interest
-        result = (data['confirmed'][data['confirmed']['country/region'] == country].iloc[:, 4:]).sum(axis=0)
+        result = (data[case_type][data[case_type]['country/region'] == country].iloc[:, 4:]).sum(axis=0)
 
     else:
-        condition = ((data['confirmed']['country/region'] == country) &
-                     (data['confirmed']['province/state'] == province))
-        result = data['confirmed'][condition].iloc[:, 4:]
+        condition = ((data[case_type]['country/region'] == country) &
+                     (data[case_type]['province/state'] == province))
+        result = data[case_type][condition].iloc[:, 4:]
         result = result.iloc[0, :]
+  
+    if sum(result == 0) == len(result):
+        result = None
+    else:
+        # Extract the dates with non-zero cases
+        result = result.loc[result != 0]
 
-    # Extract the dates with non-zero cases
-    result = result.loc[result != 0]
+        # Create a series of number of days since first infection
+        num_days = pd.Series(range(0, len(result)))
+        num_days.index = result.index
 
-    # Create a series of number of days since first infection
-    num_days = pd.Series(range(0, len(result)))
-    num_days.index = result.index
-
-    # Combine series of non-zero cases and no. of days since first infection
-    result = pd.concat([num_days, result], axis=1)
-    result.columns = ['num_days', 'confirmed_cases']
+        # Combine series of non-zero cases and no. of days since first infection
+        result = pd.concat([num_days, result], axis=1)
+        result.columns = ['num_days', 'cases']
 
     return result
 
 
-def plot_first_infection(data, country, province):
+def plot_first(data, case_type, country, province):
     """
-    returns the graph of first infection for a single country/ province
+    returns the graph of first infection/ death for a single country/ province
     """
 
     fig, ax = plt.subplots(1, 1)
 
-    table = get_first_infected(data, country, province)
+    table = get_first(data, case_type, country, None)
 
-    # Color
-    color = get_rgb((31, 119, 180))
+    if table is None:
+        pass
+    else:
+        # Color
+        color = get_rgb((31, 119, 180))
 
-    # Plot the graph
-    ax.plot(table['num_days'].values, table['confirmed_cases'].values,
-            color=color)
+        # Plot the graph
+        ax.plot(table['num_days'].values, table['cases'].values,
+                color=color)
 
     # x axis
-    ax.set_xlabel('Days since first infection')
+    ax.set_xlabel('Days since first ' + case_type)
     ax.xaxis.set_tick_params(direction='in')
 
     # y axis
@@ -323,14 +329,14 @@ def plot_first_infection(data, country, province):
     sns.despine(ax=ax)
 
     fig.tight_layout()
-    path = 'plots/case_first_infection.pdf'
+    path = 'plots/case_first_{}.pdf'.format(case_type)
     fig.savefig(path, bbox_inches='tight')
     print('Saved to {}'.format(path))
 
 
-def plot_compare_first_infection(data, countries):
+def plot_compare_first(data, case_type, countries):
     """
-    returns the graph of first infection for a few countries
+    returns the graph of first infection or death for a few countries
     """
 
     fig, ax = plt.subplots(1, 1)
@@ -342,119 +348,38 @@ def plot_compare_first_infection(data, countries):
                  (188, 189, 34),  (23, 190, 207)]
 
     for country in countries:
-        table = get_first_infected(data, country, None)
-
-        # Get color
-        color = get_rgb(palette10[countries.index(country)])
-        ax.plot(table['num_days'].values, table['confirmed_cases'].values,
-                color=color)
-
-        # No legend
-        ax.text(table['num_days'].values[-1],
-                table['confirmed_cases'].values[-1],
-                '  ' + country,
-                ha='left', va='center', color=color)
-
-    # x axis
-    ax.set_xlabel('Days since first infection')
-    ax.xaxis.set_tick_params(direction='in')
-
-    # y axis
-    ax.set_ylabel('Number of confirmed cases')
-    ax.yaxis.set_tick_params(direction='in')
-    ax.set_yticklabels(['{:,}'.format(int(x)) 
-                        for x in ax.get_yticks().tolist()])
-
-    sns.despine(ax=ax)
-
-    fig.tight_layout()
-
-    path = 'plots/compare_first_infection.pdf'
-    fig.savefig(path, bbox_inches='tight')
-    print('Saved to {}'.format(path))
-
-
-def get_first_death(data, country, province=None):
-    if province is None:
-        # Extract the data frame with the country of interest
-        death = (data['death'][data['death']['country/region'] == country].iloc[:, 4:]).sum(axis=0)
-
-    else:
-        condition = ((data['death']['country/region'] == country) &
-                     (data['death']['province/state'] == province))
-        death = data['death'][condition].iloc[:, 4:]
-        death = death.iloc[0, :]
-
-    if sum(death == 0) == len(death):
-        result = None
-    else:
-        # Find the day of first death
-        start = min(death.loc[death != 0].index)
-
-        # Find the index of the column name corresponding to start date
-        start_index = data['confirmed'].columns.get_loc(start)
-
-        # Extract the data frame for confirmed cases
-        if province is None:
-            # Extract the data frame with the country of interest
-            result = (data['confirmed'][data['confirmed']['country/region'] == country].iloc[:, start_index:]).sum(axis=0)
-
-        else:
-            condition = ((data['confirmed']['country/region'] == country) &
-                         (data['confirmed']['province/state'] == province))
-            result = data['confirmed'][condition].iloc[0, start_index:]
-        # Create a series of number of days since first infection
-        num_days = pd.Series(range(0, len(result)))
-        num_days.index = result.index
-
-        # Combine series of non-zero cases and no. of days
-        result = pd.concat([num_days, result], axis=1)
-        result.columns = ['num_days', 'confirmed_cases']
-
-    return result
-
-
-def plot_compare_first_death(data, countries):
-
-    fig, ax = plt.subplots(1, 1)
-
-    palette10 = [(31, 119, 180), (255, 127, 14),
-                 (44, 160, 44),  (214, 39, 40),
-                 (148, 103, 189),  (140, 86, 75),
-                 (227, 119, 194),  (127, 127, 127),
-                 (188, 189, 34),  (23, 190, 207)]
-
-    for country in countries:
-        table = get_first_death(data, country, None)
+        table = get_first(data, case_type, country, None)
         if table is None:
             break
         else:
             # Get color
             color = get_rgb(palette10[countries.index(country)])
             ax.plot(table['num_days'].values,
-                    table['confirmed_cases'].values,
+                    table['cases'].values,
                     color=color)
 
             # No legend
             ax.text(table['num_days'].values[-1],
-                    table['confirmed_cases'].values[-1],
+                    table['cases'].values[-1],
                     '  ' + country,
                     ha='left', va='center', color=color)
 
     # x axis
-    ax.set_xlabel('Days since first death')
+    ax.set_xlabel('Days since first ' + case_type)
     ax.xaxis.set_tick_params(direction='in')
 
     # y axis
-    ax.set_ylabel('Number of confirmed cases')
+    ax.set_ylabel('Number of ' + case_type + ' cases')
     ax.yaxis.set_tick_params(direction='in')
-    ax.set_yticklabels(['{:,}'.format(int(x)) for x in ax.get_yticks().tolist()])
+    ax.set_yticklabels(['{:,}'.format(int(x)) 
+                        for x in ax.get_yticks().tolist()])
+    ax.set_yscale('log')
 
     sns.despine(ax=ax)
 
     fig.tight_layout()
 
-    path = 'plots/compare_first_death.pdf'
+    path = 'plots/compare_first_{}.pdf'.format(case_type)
     fig.savefig(path, bbox_inches='tight')
     print('Saved to {}'.format(path))
 
@@ -477,10 +402,10 @@ if __name__ == '__main__':
     plot_case_by_country(data, args.country, args.province)
     plot_active_cases(data, args.country, args.province)
     plot_new_cases(data, args.country, args.province)
-    plot_first_infection(data, args.country, args.province)
-    plot_compare_first_infection(data, ['US', 'United Kingdom', 'Singapore',
-                                        'China', 'Italy', 'Korea, South',
-                                        'Germany', 'Iran', 'Vietnam'])
-    plot_compare_first_death(data, ['US', 'United Kingdom', 'Singapore',
-                                    'China', 'Italy', 'Korea, South',
-                                    'Germany', 'Iran', 'Vietnam'])
+    plot_first(data, 'confirmed', args.country, args.province)
+    plot_compare_first(data, 'confirmed', ['US', 'United Kingdom', 'Singapore',
+                                           'China', 'Italy', 'Korea, South',
+                                           'Germany', 'Iran', 'Vietnam'])
+    plot_compare_first(data, 'death', ['US', 'United Kingdom', 'Singapore',
+                                       'China', 'Italy', 'Korea, South',
+                                       'Germany', 'Iran', 'Vietnam'])
