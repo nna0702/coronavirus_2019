@@ -6,10 +6,10 @@ All of the datsets are downloaded from the time series datasets provided by the 
 - The datsets are updated daily from https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series. Note that there is a major change in the data structure on March 23rd. The repo we've created has not reflected the change yet.
 
 ## Analysis
-- 'analysis.py' contains the script for all of the analyses
-- 'AnalysisExample.ipynb' shows examples of some plots from 'analysis.py'
+- 'analysis.py' contains the script for all of the analyses;
+- 'AnalysisExample.ipynb' shows examples of some plots from 'analysis.py'.
 
 ## Key finding
-The plot below shows the number of deaths since the day of first death.
+The plot below shows the number of deaths (on exponential scale) since the day of first death.
 
 <img src="corona_deaths.png"/>
