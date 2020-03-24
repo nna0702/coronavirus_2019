@@ -126,7 +126,7 @@ def plot_case_by_country(data, country, province):
     fig, ax = plt.subplots(1, 1)
 
     # Colors
-    colors = [(31, 119, 180), (23, 190, 207), (214, 39, 40)]
+    colors = [(31, 119, 180), (214, 39, 40)]
     colors = [get_rgb(color) for color in colors]
 
     for case_type, color in zip(case_types, colors):
