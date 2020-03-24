@@ -5,3 +5,4 @@ data/
 plots/
 *.txt
 .DS_Store
+analysis.ipynb
