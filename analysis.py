@@ -12,14 +12,13 @@ plt.rcParams['font.sans-serif'] = "Arial"
 
 def get_data():
     # Name URLs
-    confirmed_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
-    recovered_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv'
-    death_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
+    confirmed_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
+    death_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 
     # Create a dictionary of file name and url name
-    file_names = ['data/confirmed.csv', 'data/recovered.csv', 'data/death.csv']
-    urls = [confirmed_url, recovered_url, death_url]
-    case_types = ['confirmed', 'recovered', 'death']
+    file_names = ['data/confirmed.csv', 'data/death.csv']
+    urls = [confirmed_url, death_url]
+    case_types = ['confirmed', 'death']
     data = {}
 
     # Create data/ folder
@@ -122,7 +121,7 @@ def get_title(country, province=None):
 
 
 def plot_case_by_country(data, country, province):
-    case_types = ['confirmed', 'recovered', 'death']
+    case_types = ['confirmed', 'death']
     # Plot cases by country
     fig, ax = plt.subplots(1, 1)
 
@@ -162,9 +161,8 @@ def plot_case_by_country(data, country, province):
 
 
 def plot_active_cases(data, country, province):
-    # Create a data frame with number of active cases
+    # Create a data frame with number of active cases (not including recovered)
     active = (data['confirmed'].iloc[:, 4:] -
-              data['recovered'].iloc[:, 4:] -
               data['death'].iloc[:, 4:])
 
     # Copy the identifying columns on geography
