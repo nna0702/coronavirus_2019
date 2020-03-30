@@ -13,12 +13,13 @@ plt.rcParams['font.sans-serif'] = "Arial"
 def get_data():
     # Name URLs
     confirmed_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
+    recovered_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv'
     death_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 
     # Create a dictionary of file name and url name
-    file_names = ['data/confirmed.csv', 'data/death.csv']
-    urls = [confirmed_url, death_url]
-    case_types = ['confirmed', 'death']
+    file_names = ['data/confirmed.csv', 'data/recovere.csv', 'data/death.csv']
+    urls = [confirmed_url, recovered_url, death_url]
+    case_types = ['confirmed', 'recovered', 'death']
     data = {}
 
     # Create data/ folder
@@ -121,12 +122,12 @@ def get_title(country, province=None):
 
 
 def plot_case_by_country(data, country, province):
-    case_types = ['confirmed', 'death']
+    case_types = ['confirmed', 'recovered', 'death']
     # Plot cases by country
     fig, ax = plt.subplots(1, 1)
 
     # Colors
-    colors = [(31, 119, 180), (214, 39, 40)]
+    colors = [(31, 119, 180), (23, 190, 207), (214, 39, 40)]
     colors = [get_rgb(color) for color in colors]
 
     for case_type, color in zip(case_types, colors):
@@ -135,7 +136,9 @@ def plot_case_by_country(data, country, province):
         ax.plot(dates, num_cases, color=color)
 
         # No legend
-        ax.text(dates[-1], num_cases[-1], '  ' + case_type.capitalize(),
+        ax.text(dates[-1], num_cases[-1],
+                '  {} ({})'.format(case_type.capitalize(),
+                                   num_cases[-1]),
                 color=color, ha='left', va='center')
 
         # x axis
@@ -148,6 +151,7 @@ def plot_case_by_country(data, country, province):
         # y axis
         ax.set_ylabel('Number of cases')
         ax.yaxis.set_tick_params(direction='in')
+        # ax.set_yscale('log')
 
     # Set graph title
     ax.set_title(get_title(country, province))
@@ -163,6 +167,7 @@ def plot_case_by_country(data, country, province):
 def plot_active_cases(data, country, province):
     # Create a data frame with number of active cases (not including recovered)
     active = (data['confirmed'].iloc[:, 4:] -
+              data['recovered'].iloc[:, 4:] -
               data['death'].iloc[:, 4:])
 
     # Copy the identifying columns on geography
@@ -185,6 +190,9 @@ def plot_active_cases(data, country, province):
     dates = get_dates(data, case_type)
     num_cases = get_num_cases(data, case_type, country, province)
     ax.plot(dates, num_cases, color=color_active)
+
+    ax.text(dates[-1], num_cases[-1], '{:.0f}'.format(num_cases[-1]),
+            color = color_active, ha='left', va='center')
 
     # x axis
     ax.set_xlabel('End of month')
@@ -250,6 +258,7 @@ def plot_new_cases(data, country, province):
     # y axis
     ax.set_ylabel('Number of new cases')
     ax.yaxis.set_tick_params(direction='in')
+    ax.set_yscale('log')
 
     # Set graph title
     ax.set_title(get_title(country, province))
@@ -320,6 +329,7 @@ def plot_first(data, case_type, country, province):
     # y axis
     ax.set_ylabel('Number of cases')
     ax.yaxis.set_tick_params(direction='in')
+    ax.set_yscale('log')
 
     # Set graph title
     ax.set_title(get_title(country, province))
@@ -405,7 +415,7 @@ if __name__ == '__main__':
     plot_first(data, 'confirmed', args.country, args.province)
     countries = ['US', 'United Kingdom', 'Singapore',
                  'China', 'Italy', 'Korea, South',
-                 'Germany', 'Iran', 'Vietnam']
+                 'Germany', 'Iran', 'Vietnam', 'Slovakia']
     plot_compare_first(data, 'confirmed', countries)
     plot_compare_first(data, 'death', countries)
     plot_compare_first(data, 'death', countries,
