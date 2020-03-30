@@ -151,7 +151,7 @@ def plot_case_by_country(data, country, province):
         # y axis
         ax.set_ylabel('Number of cases')
         ax.yaxis.set_tick_params(direction='in')
-        # ax.set_yscale('log')
+        ax.set_yscale('log')
 
     # Set graph title
     ax.set_title(get_title(country, province))
@@ -204,6 +204,7 @@ def plot_active_cases(data, country, province):
     # y axis
     ax.set_ylabel('Number of active cases')
     ax.yaxis.set_tick_params(direction='in')
+    ax.set_yscale('log')
 
     # Set graph title
     ax.set_title(get_title(country, province))
@@ -258,7 +259,6 @@ def plot_new_cases(data, country, province):
     # y axis
     ax.set_ylabel('Number of new cases')
     ax.yaxis.set_tick_params(direction='in')
-    ax.set_yscale('log')
 
     # Set graph title
     ax.set_title(get_title(country, province))
