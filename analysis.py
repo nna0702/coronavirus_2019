@@ -122,6 +122,9 @@ def get_title(country, province=None):
 
 
 def plot_case_by_country(data, country, province):
+    """
+    plot main case types - confirmed, recovered, death
+    """
     case_types = ['confirmed', 'recovered', 'death']
     # Plot cases by country
     fig, ax = plt.subplots(1, 1)
@@ -165,6 +168,9 @@ def plot_case_by_country(data, country, province):
 
 
 def plot_active_cases(data, country, province):
+    """
+    plots active cases (confirmed less recovered and death)
+    """
     # Create a data frame with number of active cases
     active = (data['confirmed'].iloc[:, 4:] -
               data['recovered'].iloc[:, 4:] -
@@ -218,6 +224,9 @@ def plot_active_cases(data, country, province):
 
 
 def plot_new_cases(data, country, province):
+    """
+    plot daily new cases
+    """
     # Copy the identifying columns on geography
     identifier = data['confirmed'][[
                       'province/state', 'country/region', 'lat', 'long']]
@@ -272,10 +281,10 @@ def plot_new_cases(data, country, province):
     print('Saved to {}'.format(path))
 
 
-def get_first(data, case_type, country, province=None):
+def get_first(data, n, case_type, country, province=None):
     """
     returns the time-series data frame with no. of confirmed cases from the
-    day of first infection or no. of deaths since first death
+    day of nth infection or no. of deaths since nth death
     """
     if province is None:
         # Extract the data frame with the country of interest
@@ -287,31 +296,31 @@ def get_first(data, case_type, country, province=None):
         result = data[case_type][condition].iloc[:, 4:]
         result = result.iloc[0, :]
 
-    if sum(result == 0) == len(result):
+    if sum(result < n) == len(result):
         result = None
     else:
-        # Extract the dates with non-zero cases
-        result = result.loc[result != 0]
+        # Extract the dates with at least n cases
+        result = result.loc[result >= n]
 
-        # Create a series of number of days since first infection
+        # Create a series of number of days since nth infection
         num_days = pd.Series(range(0, len(result)))
         num_days.index = result.index
 
-        # Combine series of non-zero cases and no. of days since first infection
+        # Combine series of at least n cases and no. of days since nth infection/ death
         result = pd.concat([num_days, result], axis=1)
         result.columns = ['num_days', 'cases']
 
     return result
 
 
-def plot_first(data, case_type, country, province):
+def plot_first(data, n, case_type, country, province):
     """
-    returns the graph of first infection/ death for a single country/ province
+    returns the graph of nth infection/ death for a single country/ province
     """
 
     fig, ax = plt.subplots(1, 1)
 
-    table = get_first(data, case_type, country, None)
+    table = get_first(data, n, case_type, country, None)
 
     if table is None:
         pass
@@ -324,7 +333,7 @@ def plot_first(data, case_type, country, province):
                 color=color)
 
     # x axis
-    ax.set_xlabel('Days since first ' + case_type)
+    ax.set_xlabel('Days since ' + str(n) + 'th ' + case_type + ' case')
     ax.xaxis.set_tick_params(direction='in')
 
     # y axis
@@ -343,9 +352,9 @@ def plot_first(data, case_type, country, province):
     print('Saved to {}'.format(path))
 
 
-def plot_compare_first(data, case_type, countries, path=None):
+def plot_compare_first(data, n, case_type, countries, path=None):
     """
-    returns the graph of first infection or death for a few countries
+    returns the graph after nth infection or death for a few countries
     """
 
     fig, ax = plt.subplots(1, 1)
@@ -357,9 +366,9 @@ def plot_compare_first(data, case_type, countries, path=None):
                  (188, 189, 34),  (23, 190, 207)]
 
     for country in countries:
-        table = get_first(data, case_type, country, None)
+        table = get_first(data, n, case_type, country, None)
         if table is None:
-            break
+            pass
         else:
             # Get color
             color = get_rgb(palette10[countries.index(country)])
@@ -374,7 +383,7 @@ def plot_compare_first(data, case_type, countries, path=None):
                     ha='left', va='center', color=color)
 
     # x axis
-    ax.set_xlabel('Days since first ' + case_type)
+    ax.set_xlabel('Days since ' + str(n) + 'th ' + case_type + ' case')
     ax.xaxis.set_tick_params(direction='in')
 
     # y axis
@@ -416,11 +425,11 @@ if __name__ == '__main__':
     plot_case_by_country(data, args.country, args.province)
     plot_active_cases(data, args.country, args.province)
     plot_new_cases(data, args.country, args.province)
-    plot_first(data, 'confirmed', args.country, args.province)
+    plot_first(data, 100, 'confirmed', args.country, args.province)
     countries = ['US', 'United Kingdom', 'Singapore',
                  'China', 'Italy', 'Korea, South',
                  'Germany', 'Iran', 'Vietnam', 'Slovakia']
-    plot_compare_first(data, 'confirmed', countries)
-    plot_compare_first(data, 'death', countries)
-    plot_compare_first(data, 'death', countries,
+    plot_compare_first(data, 100, 'confirmed', countries)
+    plot_compare_first(data, 25, 'death', countries)
+    plot_compare_first(data, 25, 'death', countries,
                        'corona_deaths.png')
