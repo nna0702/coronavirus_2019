@@ -384,6 +384,9 @@ def plot_compare_first(data, case_type, countries, path=None):
                         for x in ax.get_yticks().tolist()])
     ax.set_yscale('log')
 
+    # title
+    ax.set_title('As of ' + datetime.today().strftime('%Y-%m-%d'))
+
     sns.despine(ax=ax)
 
     fig.tight_layout()
