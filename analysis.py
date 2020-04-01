@@ -131,13 +131,13 @@ def plot_case_by_country(data, country, province):
     colors = [get_rgb(color) for color in colors]
 
     for case_type, color in zip(case_types, colors):
-        dates = get_dates(data, case_type)[:-1]
-        num_cases = get_num_cases(data, case_type, country, province)[:-1]
+        dates = get_dates(data, case_type)
+        num_cases = get_num_cases(data, case_type, country, province)
         ax.plot(dates, num_cases, color=color)
 
         # No legend
         ax.text(dates[-1], num_cases[-1],
-                '  {} ({})'.format(case_type.capitalize(),
+                '  {} ({:,})'.format(case_type.capitalize(),
                                    num_cases[-1]),
                 color=color, ha='left', va='center')
 
@@ -165,7 +165,7 @@ def plot_case_by_country(data, country, province):
 
 
 def plot_active_cases(data, country, province):
-    # Create a data frame with number of active cases (not including recovered)
+    # Create a data frame with number of active cases
     active = (data['confirmed'].iloc[:, 4:] -
               data['recovered'].iloc[:, 4:] -
               data['death'].iloc[:, 4:])
@@ -191,7 +191,7 @@ def plot_active_cases(data, country, province):
     num_cases = get_num_cases(data, case_type, country, province)
     ax.plot(dates, num_cases, color=color_active)
 
-    ax.text(dates[-1], num_cases[-1], '{:.0f}'.format(num_cases[-1]),
+    ax.text(dates[-1], num_cases[-1], '{:,.0f}'.format(num_cases[-1]),
             color = color_active, ha='left', va='center')
 
     # x axis
@@ -258,8 +258,9 @@ def plot_new_cases(data, country, province):
 
     # y axis
     ax.set_ylabel('Number of new cases')
+    ax.set_yticklabels(['{:,}'.format(int(x)) for x in ax.get_yticks().tolist()])
     ax.yaxis.set_tick_params(direction='in')
-
+    
     # Set graph title
     ax.set_title(get_title(country, province))
 
@@ -400,7 +401,7 @@ def plot_compare_first(data, case_type, countries, path=None):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--country', default='Vietnam', help=' ')
+    parser.add_argument('--country', default='US', help=' ')
     parser.add_argument('--province', default=None, help=' ')
     args = parser.parse_args()
 
