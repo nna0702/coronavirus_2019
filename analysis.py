@@ -8,6 +8,7 @@ import numpy as np
 from pathlib import Path
 plt.style.use('default')
 plt.rcParams['font.sans-serif'] = "Arial"
+import os
 
 
 def get_data():
@@ -433,3 +434,10 @@ if __name__ == '__main__':
     plot_compare_first(data, 25, 'death', countries)
     plot_compare_first(data, 25, 'death', countries,
                        'corona_deaths.png')
+    
+    # Save an image for website
+    website_path = 'C:\\Users\\tuananhle\\Documents\\NA\\nna0702.github.io\\assets\\img'
+    os.chdir(website_path)
+    website_path = website_path.replace('\\', '/')
+    plot_compare_first(data, 25, 'death', countries,
+                       website_path + '/corona_deaths.png')
