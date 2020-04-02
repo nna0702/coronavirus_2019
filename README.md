@@ -2,8 +2,8 @@
 
 ## Data source
 All of the datsets are downloaded from the time series datasets provided by the Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE). 
-- The description of the datasets could be found in https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data. See the section **Time series summary (csse_covid_19_time_series)**
-- The datsets are updated daily from https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series. 
+- The description of the datasets could be found [here](https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data). See the section *Time series summary (csse_covid_19_time_series)*
+- The datsets are updated daily from [here](https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series). 
 
 ## Analysis
 - 'analysis.py' contains the script for all of the analyses;
