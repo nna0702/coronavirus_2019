@@ -18,7 +18,7 @@ def get_data():
     death_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 
     # Create a dictionary of file name and url name
-    file_names = ['data/confirmed.csv', 'data/recovere.csv', 'data/death.csv']
+    file_names = ['data/confirmed.csv', 'data/recovered.csv', 'data/death.csv']
     urls = [confirmed_url, recovered_url, death_url]
     case_types = ['confirmed', 'recovered', 'death']
     data = {}
@@ -436,7 +436,7 @@ if __name__ == '__main__':
                        'corona_deaths.png')
     
     # Save an image for website
-    website_path = 'C:\\Users\\tuananhle\\Documents\\NA\\nna0702.github.io\\assets\\img'
+    website_path = 'C:\\Users\\tuananhle\\Documents\\NA\\nna0702.github.io\\image'
     os.chdir(website_path)
     website_path = website_path.replace('\\', '/')
     plot_compare_first(data, 25, 'death', countries,
