@@ -142,7 +142,7 @@ def plot_case_by_country(data, country, province):
         # No legend
         ax.text(dates[-1], num_cases[-1],
                 '  {} ({:,})'.format(case_type.capitalize(),
-                                   num_cases[-1]),
+                                     num_cases[-1]),
                 color=color, ha='left', va='center')
 
         # x axis
@@ -199,7 +199,7 @@ def plot_active_cases(data, country, province):
     ax.plot(dates, num_cases, color=color_active)
 
     ax.text(dates[-1], num_cases[-1], '{:,.0f}'.format(num_cases[-1]),
-            color = color_active, ha='left', va='center')
+            color=color_active, ha='left', va='center')
 
     # x axis
     ax.set_xlabel('End of month')
@@ -224,22 +224,22 @@ def plot_active_cases(data, country, province):
     print('Saved to {}'.format(path))
 
 
-def plot_new_cases(data, country, province):
+def plot_new_cases(data, case_type, country, province):
     """
-    plot daily new cases
+    plot daily new cases or new deaths
     """
     # Copy the identifying columns on geography
-    identifier = data['confirmed'][[
+    identifier = data[case_type][[
                       'province/state', 'country/region', 'lat', 'long']]
 
     # Insert first column
-    col = data['confirmed'].iloc[:, 4]
+    col = data[case_type].iloc[:, 4]
     daily_new = col.to_frame()
 
-    for i in range(5, len(data['confirmed'].columns)):
-        col = pd.Series(data['confirmed'].iloc[:, i] -
-                        data['confirmed'].iloc[:, i-1])
-        daily_new[data['confirmed'].columns[i]] = col
+    for i in range(5, len(data[case_type].columns)):
+        col = pd.Series(data[case_type].iloc[:, i] -
+                        data[case_type].iloc[:, i-1])
+        daily_new[data[case_type].columns[i]] = col
 
     # Append with geography identifier
     daily_new = pd.concat([identifier, daily_new], axis=1)
@@ -250,13 +250,13 @@ def plot_new_cases(data, country, province):
     # Plot active cases by country
 
     fig, ax = plt.subplots(1, 1)
-    case_type = 'daily_new'
+    # case_type = 'daily_new'
 
     # Choose color scheme
     color_daily = get_rgb((44, 160, 44))
 
-    dates = get_dates(data, case_type)
-    num_cases = get_num_cases(data, case_type, country, province)
+    dates = get_dates(data, 'daily_new')
+    num_cases = get_num_cases(data, 'daily_new', country, province)
     ax.bar(dates, num_cases, color=color_daily)
 
     # x axis
@@ -267,17 +267,17 @@ def plot_new_cases(data, country, province):
     ax.xaxis.set_tick_params(direction='in')
 
     # y axis
-    ax.set_ylabel('Number of new cases')
+    ax.set_ylabel('Number of new ' + case_type + ' cases')
     ax.set_yticklabels(['{:,}'.format(int(x)) for x in ax.get_yticks().tolist()])
     ax.yaxis.set_tick_params(direction='in')
-    
+  
     # Set graph title
     ax.set_title(get_title(country, province))
 
     sns.despine(ax=ax)
 
     fig.tight_layout()
-    path = 'plots/daily_case_by_country.pdf'
+    path = 'plots/daily_' + case_type + '_case_by_country.pdf'
     fig.savefig(path, bbox_inches='tight')
     print('Saved to {}'.format(path))
 
@@ -307,7 +307,8 @@ def get_first(data, n, case_type, country, province=None):
         num_days = pd.Series(range(0, len(result)))
         num_days.index = result.index
 
-        # Combine series of at least n cases and no. of days since nth infection/ death
+        # Combine series of at least n cases and no. of days since nth
+        # infection/ death
         result = pd.concat([num_days, result], axis=1)
         result.columns = ['num_days', 'cases']
 
@@ -332,7 +333,9 @@ def plot_first(data, n, case_type, country, province):
         # Plot the graph
         ax.plot(table['num_days'].values, table['cases'].values,
                 color=color)
-
+        ax.text(table['num_days'][-1], table['cases'][-1],
+                '{:,.0f}'.format(table['cases'][-1]),
+                color=color, ha='left', va='center')
     # x axis
     ax.set_xlabel('Days since ' + str(n) + 'th ' + case_type + ' case')
     ax.xaxis.set_tick_params(direction='in')
@@ -425,7 +428,8 @@ if __name__ == '__main__':
 
     plot_case_by_country(data, args.country, args.province)
     plot_active_cases(data, args.country, args.province)
-    plot_new_cases(data, args.country, args.province)
+    plot_new_cases(data, 'death', args.country, args.province)
+    plot_new_cases(data, 'confirmed', args.country, args.province)
     plot_first(data, 100, 'confirmed', args.country, args.province)
     countries = ['US', 'United Kingdom', 'Singapore',
                  'China', 'Italy', 'Korea, South',
@@ -434,7 +438,7 @@ if __name__ == '__main__':
     plot_compare_first(data, 25, 'death', countries)
     plot_compare_first(data, 25, 'death', countries,
                        'corona_deaths.png')
-    
+ 
     # Save an image for website
     website_path = 'C:\\Users\\tuananhle\\Documents\\NA\\nna0702.github.io\\image'
     os.chdir(website_path)
